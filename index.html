@@ -6,25 +6,30 @@
   <script src="https://cdn.tailwindcss.com"></script>
 </head>
 <body class="bg-gray-100 min-h-screen flex items-center justify-center px-4">
-  <div class="bg-white shadow-xl rounded-xl p-8 w-full max-w-xl">
-    <h1 class="text-2xl font-bold text-gray-800 mb-4 text-center">🔍 Tìm Bài Hát Qua Lời</h1>
-    
+  <div class="bg-white shadow-xl rounded-xl p-6 w-full max-w-xl">
+    <h1 class="text-2xl font-bold text-center text-gray-800 mb-4">🔍 Tìm Bài Hát Qua Lời</h1>
+
     <input id="lyricsInput" type="text" placeholder="Nhập một đoạn lời bài hát..."
       class="w-full px-4 py-3 border border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500" />
-    
+
     <button onclick="searchYouTube()"
       class="mt-4 w-full bg-blue-600 text-white py-3 rounded-xl hover:bg-blue-700 transition">Tìm bài hát</button>
-    
-    <div id="result" class="mt-6 text-center text-gray-700"></div>
+
+    <div id="result" class="mt-6 text-center text-gray-800"></div>
   </div>
 
   <script>
     async function searchYouTube() {
-      const lyrics = document.getElementById("lyricsInput").value;
+      const lyrics = document.getElementById("lyricsInput").value.trim();
       const resultDiv = document.getElementById("result");
       resultDiv.innerHTML = `<p class="text-sm text-gray-500">⏳ Đang tìm kiếm trên YouTube...</p>`;
 
-      const apiKey = "AIzaSyDUaEAdkfCAJQu1iUQQyd16uAYYWfjTX_8"; // 🔑 Nhớ thay bằng API key thật
+      if (!lyrics) {
+        resultDiv.innerHTML = `<p class="text-red-500 font-semibold">❗ Vui lòng nhập lời bài hát.</p>`;
+        return;
+      }
+
+      const apiKey = "AIzaSyDUaEAdkfCAJQu1iUQQyd16uAYYWfjTX_8"; // 👉 Thay bằng API key thật
       const query = encodeURIComponent(lyrics);
       const apiUrl = `https://www.googleapis.com/youtube/v3/search?part=snippet&q=${query}&key=${apiKey}&type=video&maxResults=1`;
 
@@ -40,17 +45,16 @@
         const video = data.items[0];
         const videoId = video.id.videoId;
         const title = video.snippet.title;
+        const description = video.snippet.description;
         const thumbnail = video.snippet.thumbnails.high.url;
         const link = `https://www.youtube.com/watch?v=${videoId}`;
 
         resultDiv.innerHTML = `
           <div class="mt-4">
-            <img src="${thumbnail}" alt="Thumbnail" class="rounded-xl w-full mb-2" />
-            <p class="text-lg font-semibold">${title}</p>
-            <a href="${link}" target="_blank" class="text-blue-600 underline">Xem trên YouTube</a>
-            <div class="mt-4">
-              <iframe class="w-full aspect-video rounded-xl" src="https://www.youtube.com/embed/${videoId}" frameborder="0" allowfullscreen></iframe>
-            </div>
+            <img src="${thumbnail}" alt="Thumbnail" class="rounded-xl w-full mb-2 shadow" />
+            <p class="text-lg font-semibold leading-snug">${title}</p>
+            <p class="text-sm text-gray-600 italic mt-1 line-clamp-2">${description}</p>
+            <a href="${link}" target="_blank" class="text-blue-600 underline mt-2 inline-block">Xem trên YouTube</a>
           </div>
         `;
       } catch (err) {
